@@ -58,6 +58,9 @@ Your challenge is to **create a Bash script** that:
 
 💡 **Bonus:** Can you enhance the script by integrating AI-based anomaly detection? Let’s get creative!  
 
+**Promt** : Hands-on: Create a GitHub repository that contains a bash script. when executed the bash script confirms the health of a virtual machine by looking at the parameters such as cpu, disk space, memory e.t.c.,. Please note that the bash script should also support a command line argument named "explain", when passed, "explain" provides the detailed summary of the health status.
+
+
 🚀 Let’s automate DevOps the smart way! Drop a **🔥** if you’re ready!  
 
 #AIforDevOps #Automation #MachineLearning #DevOps #BashScripting #Teacode1122
