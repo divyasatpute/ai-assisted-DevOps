@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Function to check CPU usage
+check_cpu() {
+    echo "Checking CPU usage..."
+    cpu_usage=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}')
+    echo "CPU Usage: $cpu_usage"
+}
+
+# Function to check disk space usage
+check_disk() {
+    echo "Checking Disk space usage..."
+    disk_usage=$(df -h / | grep / | awk '{ print $5 }')
+    echo "Disk Usage: $disk_usage"
+}
+
+# Function to check memory usage
+check_memory() {
+    echo "Checking Memory usage..."
+    memory_usage=$(free -m | awk 'NR==2{printf "Memory Usage: %s/%sMB (%.2f%%)\n", $3,$2,$3*100/$2 }')
+    echo "$memory_usage"
+}
+
+# Function to provide a detailed summary
+explain_summary() {
+    echo "Detailed Summary:"
+    echo "- CPU Usage: Shows the percentage of CPU utilization."
+    echo "- Disk Usage: Shows the percentage of disk space usage on the root filesystem."
+    echo "- Memory Usage: Shows the amount of used and total memory in MB and the percentage of memory utilization."
+}
+
+# Check if "explain" argument is passed
+if [ "$1" == "explain" ]; then
+    explain_summary
+else
+    check_cpu
+    check_disk
+    check_memory
+fi
