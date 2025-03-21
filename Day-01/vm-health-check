@@ -2,38 +2,70 @@
 
 # Function to check CPU usage
 check_cpu() {
-    echo "Checking CPU usage..."
-    cpu_usage=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}')
-    echo "CPU Usage: $cpu_usage"
+  cpu_usage=$(top -bn1 | grep "Cpu(s)" | \
+             sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | \
+             awk '{print 100 - $1}')
+  echo "$cpu_usage"
 }
 
-# Function to check disk space usage
-check_disk() {
-    echo "Checking Disk space usage..."
-    disk_usage=$(df -h / | grep / | awk '{ print $5 }')
-    echo "Disk Usage: $disk_usage"
+# Function to check disk space
+check_disk_space() {
+  disk_usage=$(df -h / | grep / | awk '{ print $5 }' | sed 's/%//g')
+  echo "$disk_usage"
 }
 
 # Function to check memory usage
 check_memory() {
-    echo "Checking Memory usage..."
-    memory_usage=$(free -m | awk 'NR==2{printf "Memory Usage: %s/%sMB (%.2f%%)\n", $3,$2,$3*100/$2 }')
-    echo "$memory_usage"
+  memory_usage=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
+  echo "$memory_usage"
 }
 
-# Function to provide a detailed summary
-explain_summary() {
-    echo "Detailed Summary:"
-    echo "- CPU Usage: Shows the percentage of CPU utilization."
-    echo "- Disk Usage: Shows the percentage of disk space usage on the root filesystem."
-    echo "- Memory Usage: Shows the amount of used and total memory in MB and the percentage of memory utilization."
+# Function to provide detailed summary
+detailed_summary() {
+  cpu=$(check_cpu)
+  disk=$(check_disk_space)
+  memory=$(check_memory)
+
+  echo "Detailed CPU Usage: ${cpu}%"
+  top -bn1 | grep "Cpu(s)"
+  
+  echo "Detailed Disk Usage: ${disk}%"
+  df -h /
+  
+  echo "Detailed Memory Usage: ${memory}%"
+  free -m
+}
+
+# Main function to check health status
+check_health() {
+  cpu=$(check_cpu)
+  disk=$(check_disk_space)
+  memory=$(check_memory)
+
+  if (( $(echo "$cpu < 60" | bc -l) )) && (( $(echo "$disk < 60" | bc -l) )) && (( $(echo "$memory < 60" | bc -l) )); then
+    echo "Healthy"
+    if [ "$1" == "explain" ]; then
+      echo "CPU Usage: ${cpu}%"
+      echo "Disk Usage: ${disk}%"
+      echo "Memory Usage: ${memory}%"
+      detailed_summary
+    fi
+  else
+    echo "Not Healthy"
+    if [ "$1" == "explain" ]; then
+      echo "CPU Usage: ${cpu}%"
+      echo "Disk Usage: ${disk}%"
+      echo "Memory Usage: ${memory}%"
+      detailed_summary
+    fi
+  fi
 }
 
 # Check if "explain" argument is passed
 if [ "$1" == "explain" ]; then
-    explain_summary
+  echo "Health Check Summary with Detailed Explanation:"
+  check_health explain
 else
-    check_cpu
-    check_disk
-    check_memory
+  echo "Health Check Summary:"
+  check_health
 fi
